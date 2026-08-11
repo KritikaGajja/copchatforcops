@@ -1,3 +1,7 @@
+# Documentation — internal only, not published to GitHub
+*.md
+!README.md
+
 # Secrets — never commit Supabase / FCM keys
 .env
 .env.*
@@ -54,6 +58,3 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Secrets
-.env
-.env.*
