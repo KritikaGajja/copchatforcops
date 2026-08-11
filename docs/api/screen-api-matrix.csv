@@ -1,0 +1,19 @@
+Phase,Module,Screen ID,Screen Name,Role Access,User Action,Type,Method / Event,Endpoint,Request Payload,Response Data,Auth,Notes,Status
+1,auth,SCR-001,Splash,All,App opens,REST,GET,/auth/me,-,"{ user, role, permissions }",Yes,Validates stored token; routes to Login or Home,Not started
+1,auth,SCR-002,Login,All,Submit credentials,REST,POST,/auth/login,"{ serviceId, password, deviceId }","{ accessToken, refreshToken, user }",No,Lock account after 5 failed attempts,Not started
+1,auth,SCR-002,Login,All,Token expired (any screen),REST,POST,/auth/refresh,{ refreshToken },"{ accessToken, refreshToken }",No,Called by Dio interceptor only; never by a repository,Not started
+1,auth,SCR-003,Home Shell,All,Tap logout,REST,POST,/auth/logout,{ deviceId },-,Yes,Must clear secure storage and close the socket,Not started
+2,profile,SCR-010,My Profile,All,Screen opens,REST,GET,/users/me,-,{ user },Yes,,Not started
+2,profile,SCR-011,Edit Profile,All,Save changes,REST,PATCH,/users/me,"{ name, phone, avatarFileId }",{ user },Yes,PATCH not PUT — partial update,Not started
+2,profile,SCR-011,Edit Profile,All,Pick avatar,REST,POST,/files,multipart file,"{ fileId, url, thumbnailUrl }",Yes,Upload first then PATCH with fileId,Not started
+2,profile,SCR-012,Officer Profile,All,Screen opens,REST,GET,/users/{userId},-,{ user },Yes,Fields shown vary by viewer role,Not started
+3,chat,SCR-020,Chat List,All,Screen opens,REST,GET,/chats?page=1&limit=20,-,"{ items[], pagination }",Yes,Offset pagination — list is stable,Not started
+3,chat,SCR-021,Chat Thread,Members,Screen opens,REST,GET,/chats/{chatId}/messages?limit=30,-,"{ items[], pagination }",Yes,Cursor pagination — see api-conventions section 6,Not started
+3,chat,SCR-021,Chat Thread,Members,Scroll up,REST,GET,/chats/{chatId}/messages?before={msgId}&limit=30,-,"{ items[], pagination }",Yes,Uses nextCursor from previous response,Not started
+3,chat,SCR-021,Chat Thread,Members,Send message,WS,message:send,-,"{ chatId, tempId, text }","{ tempId, messageId }",Socket,Optimistic — render before server confirms,Not started
+3,chat,SCR-021,Chat Thread,Members,Message arrives,WS,message:new,-,-,{ message },Socket,Server to app only,Not started
+4,chat,SCR-021,Chat Thread,Members,Typing,WS,typing:start / typing:stop,-,{ chatId },-,Socket,Throttle; stop after 3s idle,Not started
+4,chat,SCR-021,Chat Thread,Members,Message visible on screen,WS,message:read,-,"{ chatId, messageId }",-,Socket,On visibility not on screen open,Not started
+4,presence,SCR-020,Chat List,All,Any presence change,WS,presence:update,-,-,"{ userId, status, lastSeenAt }",Socket,,Not started
+8,emergency,SCR-060,SOS,All,Long-press SOS,REST,POST,/sos/trigger,"{ lat, lng, accuracy, message }",{ sosId },Yes,Fire with last-known GPS immediately then update,Not started
+8,emergency,SCR-061,SOS Alert,All,SOS received,WS,sos:triggered,-,-,"{ sosId, userId, lat, lng }",Socket,Full-screen alert + high-priority FCM if offline,Not started
